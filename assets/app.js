@@ -69,45 +69,47 @@ function bindCalc(ids,fn){ var els=ids.map(function(i){return document.getElemen
   els.forEach(function(el){ el.addEventListener('input',fn); el.addEventListener('change',fn); }); if(els.length) fn(); }
 function letterGrade(p){ if(p>=90)return'A'; if(p>=80)return'B'; if(p>=70)return'C'; if(p>=60)return'D'; return'F'; }
 
-/* ---------- Sheetu hero animator (JavaScript-driven so it always moves) ---------- */
+/* ---------- Sheetu hero animator: timer-stepped walk so the motion is unmistakable ---------- */
 (function(){
   var hero=document.querySelector('.hero-sheetu'); if(!hero) return;
   var stage=hero.querySelector('.sheetu-stage'), svg=hero.querySelector('.sheetu-svg'), bubble=hero.querySelector('.bubble');
-  if(!svg || !svg.animate) return;
+  if(!svg) return;
   function parts(sel){ return Array.prototype.slice.call(svg.querySelectorAll(sel)); }
-  /* JS takes over the hero Sheetu motion: stop the CSS loops on the parts it drives */
+  var body=svg.querySelector('.sh-body'), eyes=svg.querySelector('.sh-eyes'), wave=svg.querySelector('.sh-wave');
+  var legL=parts('.leg-l'), legR=parts('.leg-r');
+  /* JS drives the hero Sheetu: switch off the CSS loops on the parts it controls */
   ['.sh-body','.sh-eyes','.sh-wave','.sh-calc','.leg-l','.leg-r'].forEach(function(sel){
     parts(sel).forEach(function(el){ el.style.animation='none'; });
   });
   if(stage) stage.style.animation='none';
-  function loop(el, frames, dur, extra){
-    if(!el) return;
-    var opts={duration:dur, iterations:Infinity, easing:'ease-in-out'};
-    if(extra) for(var k in extra) opts[k]=extra[k];
-    el.animate(frames, opts);
-  }
-  if(stage) loop(stage, [{transform:'translateX(-34px) rotate(-1.6deg)'},{transform:'translateX(34px) rotate(1.6deg)'}], 3200, {direction:'alternate'});
-  loop(svg.querySelector('.sh-body'), [{transform:'translateY(0)'},{transform:'translateY(-4.5px)'}], 780, {direction:'alternate'});
-  parts('.leg-l').forEach(function(el){ el.style.transformBox='fill-box'; el.style.transformOrigin='top center';
-    loop(el, [{transform:'rotate(21deg)'},{transform:'rotate(-21deg)'}], 430, {direction:'alternate'}); });
-  parts('.leg-r').forEach(function(el){ el.style.transformBox='fill-box'; el.style.transformOrigin='top center';
-    loop(el, [{transform:'rotate(-21deg)'},{transform:'rotate(21deg)'}], 430, {direction:'alternate'}); });
-  var eyes=svg.querySelector('.sh-eyes');
-  if(eyes){ eyes.style.transformBox='fill-box'; eyes.style.transformOrigin='center';
-    eyes.animate([{transform:'scaleY(1)',offset:0},{transform:'scaleY(1)',offset:0.92},{transform:'scaleY(0.08)',offset:0.955},{transform:'scaleY(1)',offset:1}], {duration:4300, iterations:Infinity}); }
-  var wave=svg.querySelector('.sh-wave');
-  if(wave){ wave.style.transformBox='fill-box'; wave.style.transformOrigin='0% 90%';
-    wave.animate([{transform:'rotate(0deg)',offset:0},{transform:'rotate(0deg)',offset:0.55},{transform:'rotate(-19deg)',offset:0.65},{transform:'rotate(7deg)',offset:0.74},{transform:'rotate(-15deg)',offset:0.83},{transform:'rotate(0deg)',offset:0.92},{transform:'rotate(0deg)',offset:1}], {duration:3400, iterations:Infinity}); }
-  loop(svg.querySelector('.sh-calc'), [{transform:'translateY(0)'},{transform:'translateY(-3px)'}], 1300, {direction:'alternate'});
+  [eyes,wave].forEach(function(el){ if(el){ el.style.transformBox='fill-box'; } });
+  if(eyes) eyes.style.transformOrigin='center';
+  if(wave) wave.style.transformOrigin='0% 90%';
+  legL.concat(legR).forEach(function(el){ el.style.transformBox='fill-box'; el.style.transformOrigin='top center'; });
+  var pos=0, dir=1, tick=0, hop=0;
+  setInterval(function(){
+    tick++;
+    pos += dir*4;
+    if(pos>=74){ pos=74; dir=-1; } else if(pos<=-74){ pos=-74; dir=1; }
+    var stepping = (tick % 2 === 0);
+    var hopY = 0;
+    if(hop>0){ hopY = -hop*4; hop--; }
+    if(stage) stage.style.transform='translateX('+pos+'px) translateY('+hopY+'px)';
+    if(body) body.style.transform='translateY('+(stepping?-3.5:0)+'px)';
+    legL.forEach(function(el){ el.style.transform='rotate('+(stepping?21:-21)+'deg)'; });
+    legR.forEach(function(el){ el.style.transform='rotate('+(stepping?-21:21)+'deg)'; });
+    if(wave){ var w=tick%30; wave.style.transform = (w>=17&&w<=25) ? ('rotate('+((w%2)?-17:7)+'deg)') : 'rotate(0deg)'; }
+    if(eyes){ eyes.style.transform = (tick%34===0) ? 'scaleY(0.08)' : 'scaleY(1)'; }
+  }, 120);
   /* talking bubble: auto-rotate tips, and Sheetu answers when clicked */
   var lines=['Sheetu makes Excel easy!','All 20 templates are FREE — try one!','Need a GPA or Loan calculator? Scroll down!','Psst… tap me again. I like it here.','Yellow cells = your numbers. I do the maths!'];
   var li=0;
   function nextLine(){ if(!bubble) return; li=(li+1)%lines.length; bubble.textContent=lines[li];
-    if(bubble.animate) bubble.animate([{opacity:0.2, transform:'scale(.94)'},{opacity:1, transform:'scale(1)'}], {duration:320, easing:'ease-out'}); }
+    if(bubble.animate) bubble.animate([{opacity:0.2},{opacity:1}], {duration:300, easing:'ease-out'}); }
   setInterval(nextLine, 6000);
+  svg.style.cursor='pointer';
   svg.addEventListener('click', function(){
-    nextLine();
-    if(stage && stage.animate) stage.animate([{transform:'translateY(0)'},{transform:'translateY(-18px)'},{transform:'translateY(0)'}], {duration:480, easing:'ease-out'});
+    nextLine(); hop=5;
     toast('Sheetu says: '+(bubble?bubble.textContent:'Excel is easy!'));
   });
 })();
