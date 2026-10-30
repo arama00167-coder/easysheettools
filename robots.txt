@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://easysheettools.vercel.app/sitemap.xml
