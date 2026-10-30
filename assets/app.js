@@ -87,17 +87,18 @@ function letterGrade(p){ if(p>=90)return'A'; if(p>=80)return'B'; if(p>=70)return
   if(wave) wave.style.transformOrigin='0% 90%';
   legL.concat(legR).forEach(function(el){ el.style.transformBox='fill-box'; el.style.transformOrigin='top center'; });
   var pos=0, dir=1, tick=0, hop=0;
+  var RANGE = (window.innerWidth && window.innerWidth<700) ? 58 : 118;
   setInterval(function(){
     tick++;
-    pos += dir*4;
-    if(pos>=74){ pos=74; dir=-1; } else if(pos<=-74){ pos=-74; dir=1; }
+    pos += dir*5;
+    if(pos>=RANGE){ pos=RANGE; dir=-1; } else if(pos<=-RANGE){ pos=-RANGE; dir=1; }
     var stepping = (tick % 2 === 0);
     var hopY = 0;
     if(hop>0){ hopY = -hop*4; hop--; }
     if(stage) stage.style.transform='translateX('+pos+'px) translateY('+hopY+'px)';
-    if(body) body.style.transform='translateY('+(stepping?-3.5:0)+'px)';
-    legL.forEach(function(el){ el.style.transform='rotate('+(stepping?21:-21)+'deg)'; });
-    legR.forEach(function(el){ el.style.transform='rotate('+(stepping?-21:21)+'deg)'; });
+    if(body) body.style.transform='translateY('+(stepping?-5:0)+'px)';
+    legL.forEach(function(el){ el.style.transform= stepping ? 'translateY(-8px) rotate(23deg)' : 'rotate(-16deg)'; });
+    legR.forEach(function(el){ el.style.transform= stepping ? 'rotate(-16deg)' : 'translateY(-8px) rotate(23deg)'; });
     if(wave){ var w=tick%30; wave.style.transform = (w>=17&&w<=25) ? ('rotate('+((w%2)?-17:7)+'deg)') : 'rotate(0deg)'; }
     if(eyes){ eyes.style.transform = (tick%34===0) ? 'scaleY(0.08)' : 'scaleY(1)'; }
   }, 120);
