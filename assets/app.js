@@ -69,6 +69,49 @@ function bindCalc(ids,fn){ var els=ids.map(function(i){return document.getElemen
   els.forEach(function(el){ el.addEventListener('input',fn); el.addEventListener('change',fn); }); if(els.length) fn(); }
 function letterGrade(p){ if(p>=90)return'A'; if(p>=80)return'B'; if(p>=70)return'C'; if(p>=60)return'D'; return'F'; }
 
+/* ---------- Sheetu hero animator (JavaScript-driven so it always moves) ---------- */
+(function(){
+  var hero=document.querySelector('.hero-sheetu'); if(!hero) return;
+  var stage=hero.querySelector('.sheetu-stage'), svg=hero.querySelector('.sheetu-svg'), bubble=hero.querySelector('.bubble');
+  if(!svg || !svg.animate) return;
+  function parts(sel){ return Array.prototype.slice.call(svg.querySelectorAll(sel)); }
+  /* JS takes over the hero Sheetu motion: stop the CSS loops on the parts it drives */
+  ['.sh-body','.sh-eyes','.sh-wave','.sh-calc','.leg-l','.leg-r'].forEach(function(sel){
+    parts(sel).forEach(function(el){ el.style.animation='none'; });
+  });
+  if(stage) stage.style.animation='none';
+  function loop(el, frames, dur, extra){
+    if(!el) return;
+    var opts={duration:dur, iterations:Infinity, easing:'ease-in-out'};
+    if(extra) for(var k in extra) opts[k]=extra[k];
+    el.animate(frames, opts);
+  }
+  if(stage) loop(stage, [{transform:'translateX(-34px) rotate(-1.6deg)'},{transform:'translateX(34px) rotate(1.6deg)'}], 3200, {direction:'alternate'});
+  loop(svg.querySelector('.sh-body'), [{transform:'translateY(0)'},{transform:'translateY(-4.5px)'}], 780, {direction:'alternate'});
+  parts('.leg-l').forEach(function(el){ el.style.transformBox='fill-box'; el.style.transformOrigin='top center';
+    loop(el, [{transform:'rotate(21deg)'},{transform:'rotate(-21deg)'}], 430, {direction:'alternate'}); });
+  parts('.leg-r').forEach(function(el){ el.style.transformBox='fill-box'; el.style.transformOrigin='top center';
+    loop(el, [{transform:'rotate(-21deg)'},{transform:'rotate(21deg)'}], 430, {direction:'alternate'}); });
+  var eyes=svg.querySelector('.sh-eyes');
+  if(eyes){ eyes.style.transformBox='fill-box'; eyes.style.transformOrigin='center';
+    eyes.animate([{transform:'scaleY(1)',offset:0},{transform:'scaleY(1)',offset:0.92},{transform:'scaleY(0.08)',offset:0.955},{transform:'scaleY(1)',offset:1}], {duration:4300, iterations:Infinity}); }
+  var wave=svg.querySelector('.sh-wave');
+  if(wave){ wave.style.transformBox='fill-box'; wave.style.transformOrigin='0% 90%';
+    wave.animate([{transform:'rotate(0deg)',offset:0},{transform:'rotate(0deg)',offset:0.55},{transform:'rotate(-19deg)',offset:0.65},{transform:'rotate(7deg)',offset:0.74},{transform:'rotate(-15deg)',offset:0.83},{transform:'rotate(0deg)',offset:0.92},{transform:'rotate(0deg)',offset:1}], {duration:3400, iterations:Infinity}); }
+  loop(svg.querySelector('.sh-calc'), [{transform:'translateY(0)'},{transform:'translateY(-3px)'}], 1300, {direction:'alternate'});
+  /* talking bubble: auto-rotate tips, and Sheetu answers when clicked */
+  var lines=['Sheetu makes Excel easy!','All 20 templates are FREE — try one!','Need a GPA or Loan calculator? Scroll down!','Psst… tap me again. I like it here.','Yellow cells = your numbers. I do the maths!'];
+  var li=0;
+  function nextLine(){ if(!bubble) return; li=(li+1)%lines.length; bubble.textContent=lines[li];
+    if(bubble.animate) bubble.animate([{opacity:0.2, transform:'scale(.94)'},{opacity:1, transform:'scale(1)'}], {duration:320, easing:'ease-out'}); }
+  setInterval(nextLine, 6000);
+  svg.addEventListener('click', function(){
+    nextLine();
+    if(stage && stage.animate) stage.animate([{transform:'translateY(0)'},{transform:'translateY(-18px)'},{transform:'translateY(0)'}], {duration:480, easing:'ease-out'});
+    toast('Sheetu says: '+(bubble?bubble.textContent:'Excel is easy!'));
+  });
+})();
+
 /* ---------- GPA Calculator ---------- */
 (function(){
   var rows=document.getElementById('gpaRows'); if(!rows) return;
