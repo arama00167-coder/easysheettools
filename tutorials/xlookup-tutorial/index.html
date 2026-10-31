@@ -100,7 +100,12 @@
   <div class="footer-bar"><div class="wrap">© 2026 EasySheetTools. Free templates for personal and business use. Every formula is checked before publishing. No sign-up, no hidden charges.</div></div>
 </footer>
 <div class="sheetu-helper" id="sheetuHelper">
-  <div class="helper-bubble" id="helperBubble">Hi! I am Sheetu. Everything here is free — pick a template and start in minutes.</div>
+  <div class="helper-bubble" id="helperBubble" role="dialog" aria-label="Sheetu's guided tour">
+    <button class="guide-x" id="guideClose" aria-label="Close guide">&times;</button>
+    <div class="guide-text" id="guideText"></div>
+    <div class="guide-cta" id="guideCta" style="display:none"><a href="/templates">Browse Templates</a><a href="/calculators">Try a Calculator</a></div>
+    <div class="guide-foot"><span class="guide-dots" id="guideDots"></span><span class="guide-btns"><button class="guide-btn ghost" id="guideBack">Back</button><button class="guide-btn" id="guideNext">Next</button></span></div>
+  </div>
   <button class="helper-btn" id="helperBtn" aria-label="Chat with Sheetu"><svg class="sheetu-helper-svg" viewBox="0 0 230 200" role="img" aria-label="Sheetu, the EasySheetTools mascot" xmlns="http://www.w3.org/2000/svg">
   <ellipse class="sh-shadow" cx="112" cy="188" rx="58" ry="8" fill="#163258" opacity="0.14"/>
   <g class="sh-legs">

@@ -21,18 +21,35 @@ document.addEventListener('click',function(e){
 /* mobile nav */
 var navToggle=document.getElementById('navToggle'), mainNav=document.getElementById('mainNav');
 if(navToggle) navToggle.addEventListener('click',function(){ mainNav.classList.toggle('open'); });
-/* Sheetu helper */
+/* Sheetu helper — welcome greeting + guided tour */
 var helperBtn=document.getElementById('helperBtn'), helperBubble=document.getElementById('helperBubble');
-var sheetuMsgs=['Hi! I am Sheetu. Everything here is free — pick a template and start in minutes.',
- 'Looking for a calculator? Try the GPA, Loan or Compound Interest calculator — they work right here in your browser.',
- 'Every template works in Excel AND Google Sheets. Just download and fill the yellow cells.',
- 'Need all 20 templates at once? See the Bundles page.','Stuck on a formula? The Tutorials page explains XLOOKUP, VLOOKUP and Pivot Tables with examples.'];
-var msgIdx=0;
-if(helperBtn) helperBtn.addEventListener('click',function(){
-  helperBubble.textContent=sheetuMsgs[msgIdx%sheetuMsgs.length]; msgIdx++;
-  helperBubble.classList.toggle('show',true);
-  clearTimeout(helperBubble._h); helperBubble._h=setTimeout(function(){helperBubble.classList.remove('show')},6000);
-});
+var guideText=document.getElementById('guideText'), guideDots=document.getElementById('guideDots'),
+    guideNext=document.getElementById('guideNext'), guideBack=document.getElementById('guideBack'),
+    guideClose=document.getElementById('guideClose'), guideCta=document.getElementById('guideCta');
+var guideSteps=[
+ 'Hello! I am Sheetu — welcome to EasySheetTools! Let me show you around; it takes only 20 seconds.',
+ 'First, the free templates: 20 ready-made Excel sheets for business, money, studies and freelance work. Just fill the yellow cells — the maths happens by itself.',
+ 'Next, the calculators: GPA, loan, savings, salary and freelance fees. They work right here in your browser — no download needed.',
+ 'Lost? Use the search bar at the top and type what you need, like "invoice" or "budget". The tutorials page also explains tricky formulas in plain words.',
+ 'That is everything! Pick a button below to start — and whenever you need help, tap me here in the corner. I am always around.'];
+var gStep=0, guideSeen=false;
+try{ guideSeen=!!localStorage.getItem('est_guide_done'); }catch(e){}
+function renderGuide(){ if(!guideText) return; var last=gStep===guideSteps.length-1;
+  guideText.textContent=guideSteps[gStep];
+  guideDots.textContent='Step '+(gStep+1)+' of '+guideSteps.length;
+  guideBack.style.visibility=gStep?'visible':'hidden';
+  guideNext.textContent=last?'Done':(gStep===0?'Show me':'Next');
+  guideCta.style.display=last?'flex':'none'; }
+function openGuide(){ gStep=0; renderGuide(); if(helperBubble) helperBubble.classList.add('show'); }
+function closeGuide(){ if(helperBubble) helperBubble.classList.remove('show');
+  try{ localStorage.setItem('est_guide_done','1'); }catch(e){} guideSeen=true; }
+if(helperBtn&&helperBubble){
+  helperBtn.addEventListener('click',openGuide);
+  guideNext.addEventListener('click',function(){ if(gStep>=guideSteps.length-1){ closeGuide(); } else { gStep++; renderGuide(); } });
+  guideBack.addEventListener('click',function(){ if(gStep>0){ gStep--; renderGuide(); } });
+  guideClose.addEventListener('click',closeGuide);
+  if(!guideSeen){ setTimeout(openGuide,1200); }
+}
 /* site search */
 var searchInputs=[document.getElementById('siteSearch')].filter(Boolean);
 var searchIndex=null;
